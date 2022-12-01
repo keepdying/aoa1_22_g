@@ -5,37 +5,39 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <iomanip>
 
 using namespace std;
 
 struct Household {
     string datetime;
-    float gap;
-    float grp;
-    float v;
-    float gi;
+    double gap;
+    double grp;
+    double v;
+    double gi;
 };
 
 class MaxHeap {
     public:
-        vector<float> arr;
+        vector<double> arr;
         // Function to insert a new node to the Heap
-        void insertNode(float Key){
+        void insertNode(double Key){
             // Increase the size of Heap by 1
             n = n + 1;
             // Insert the element at end of Heap
-            arr[n - 1] = Key;
+            arr.push_back(Key);
             // Heapify the new node following a
             // Bottom-up approach
             heapify(n, n - 1);
         }
-        float deleteRoot(){
-            float root = arr[0];
+        double deleteRoot(){
+            double root = arr[0];
             // Get the last element
-            float lastElement = arr[n - 1];
+            double lastElement = arr[n - 1];
             // Replace root with last element
             arr[0] = lastElement;
             // Decrease size of heap by 1
+            arr.pop_back();
             n = n - 1;
             // heapify the root node
             heapify(n, 0);
@@ -67,25 +69,26 @@ class MaxHeap {
 
 class MinHeap {
     public:
-        vector<float> arr;
+        vector<double> arr;
         // Function to insert a new node to the Heap
-        void insertNode(float Key){
+        void insertNode(double Key){
             // Increase the size of Heap by 1
             n = n + 1;
             // Insert the element at end of Heap
-            arr[n - 1] = Key;
+            arr.push_back(Key);
             // Heapify the new node following a
             // Bottom-up approach
             heapify(n, n - 1);
         }
-        float deleteRoot()
+        double deleteRoot()
         {
-            float root = arr[0];
+            double root = arr[0];
             // Get the last element
-            float lastElement = arr[n - 1];
+            double lastElement = arr[n - 1];
             // Replace root with last element
             arr[0] = lastElement;
             // Decrease size of heap by 1
+            arr.pop_back();
             n = n - 1;
             // heapify the root node
             heapify(n, 0);
@@ -118,6 +121,8 @@ class Handler {
 	public:
         string selected_column;
 		vector<string> features;
+        string start_date;
+        string stop_date;
         
         void add_data(stringstream &s){
             Household data;
@@ -135,7 +140,7 @@ class Handler {
             stop_date = fulldate;
 
             getline(s, buffer, ',');
-            data.gap = stof(buffer);
+            data.gap = stod(buffer);
 
             if (selected_column == "gap"){
                 summ+= data.gap;
@@ -145,10 +150,11 @@ class Handler {
                 if (data.gap > maxx){
                     maxx = data.gap;
                 }
+                processHeaps(data.gap);
             }
 
             getline(s, buffer, ',');
-            data.grp = stof(buffer);
+            data.grp = stod(buffer);
 
             if (selected_column == "grp"){
                 summ+= data.grp;
@@ -158,10 +164,11 @@ class Handler {
                 if (data.grp > maxx){
                     maxx = data.grp;
                 }
+                processHeaps(data.grp);
             }
 
             getline(s, buffer, ',');
-            data.v = stof(buffer);
+            data.v = stod(buffer);
 
             if (selected_column == "v"){
                 summ+= data.v;
@@ -171,10 +178,11 @@ class Handler {
                 if (data.v > maxx){
                     maxx = data.v;
                 }
+                processHeaps(data.v);
             }
 
             getline(s, buffer);
-            data.gi = stof(buffer);
+            data.gi = stod(buffer);
 
             if (selected_column == "gi"){
                 summ+= data.gi;
@@ -184,6 +192,7 @@ class Handler {
                 if (data.gi > maxx){
                     maxx = data.gi;
                 }
+                processHeaps(data.gi);
             }
 
             array.push_back(data);
@@ -194,54 +203,55 @@ class Handler {
 
         }
 
-        // float get_firstq(){
-
-        // }
-
-        float get_median(){
-
-
+        double get_firstq(){
+            return firstq;
         }
 
-        // float get_thirdq(){
-            
-        // }
+        double get_median(){
+            return median;
+        }
 
-        float get_mean(){
+        double get_thirdq(){
+            return thirdq;
+        }
+
+        double get_mean(){
             return mean;
         }
 
-        float get_max(){
+        double get_max(){
             return maxx;
         }
 
-        float get_min(){
+        double get_min(){
             return minn;
         }
 
-        float get_sum(){
+        double get_sum(){
             return summ;
         }
 
-        float get_std(){
-            float std;
-            float sum;
+        double get_std(){
+            double std;
+            double sum;
             for (int i = 0; i < array.size(); i++){
                 if (selected_column == "gap"){
-                    sum += (array[i].gap - mean);
+                    sum += (array[i].gap - mean) * (array[i].gap - mean);
 
                 }
                 if (selected_column == "grp"){
-                    sum += (array[i].grp - mean);
+                    sum += (array[i].grp - mean) * (array[i].grp - mean) ;
                 }
                 if (selected_column == "v"){
-                    sum += (array[i].v - mean);
+                    sum += (array[i].v - mean) * (array[i].v - mean);
                 }
                 if (selected_column == "gi"){
-                    sum += (array[i].gi - mean);
+                    sum += (array[i].gi - mean) * (array[i].gi - mean);
                 }
             }
-            return sqrt(sum / array.size());
+            sum = sum / double(array.size());
+            std = sqrt(sum);
+            return std;
         }
 
 
@@ -257,22 +267,19 @@ class Handler {
         MinHeap thirdq_min_heap;
         MaxHeap thirdq_max_heap;
 
-        float firstq;
-        float median;
-        float thirdq;
+        double firstq;
+        double median;
+        double thirdq;
 
-        float minn;
-        float maxx;
-        float mean = 0;
-        float summ = 0;
-        string start_date;
-        string stop_date;
+        double minn = INT64_MAX;
+        double maxx;
+        double mean = 0;
+        double summ = 0;
 
-        void processHeaps(float &key){
+        void processHeaps(double &key){
             if (median_min_heap.N() == 0){
 
                 firstq_min_heap.insertNode(key);
-
                 firstq = key;
 
                 median_min_heap.insertNode(key);
@@ -282,11 +289,11 @@ class Handler {
                 thirdq = key;
                 return;
 
-            } else if (median_min_heap.N() == 1 & median_max_heap.N() == 0){
+            } else if (median_min_heap.N() == 1 and median_max_heap.N() == 0){
 
-                firstq_min_heap.insertNode(key);
-                median_min_heap.insertNode(key);
-                thirdq_min_heap.insertNode(key);
+                firstq_max_heap.insertNode(key);
+                median_max_heap.insertNode(key);
+                thirdq_max_heap.insertNode(key);
 
                 if(median_min_heap.arr[0] > median_max_heap.arr[0]){
                     swap(firstq_min_heap.arr[0], firstq_max_heap.arr[0]);
@@ -294,9 +301,9 @@ class Handler {
                     swap(thirdq_min_heap.arr[0], thirdq_max_heap.arr[0]);
                 }
 
-                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / 2;
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
-                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / 2;
+                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
+                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
+                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
                 return;
             }
 
@@ -315,15 +322,15 @@ class Handler {
             }
             // check size and set median accordingly
             if (median_min_heap.N() > median_max_heap.N() + 1){
-                float root = median_min_heap.deleteRoot();
+                double root = median_min_heap.deleteRoot();
                 median_max_heap.insertNode(root);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
+                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
             } else if (median_max_heap.N() > median_min_heap.N() + 1){
-                float root = median_max_heap.deleteRoot();
+                double root = median_max_heap.deleteRoot();
                 median_min_heap.insertNode(root);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
+                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
             } else if (median_min_heap.N() == median_max_heap.N()) {
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
+                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
             } else if (median_min_heap.N() == (median_max_heap.N() + 1)){
                 median = median_min_heap.arr[0];
             } else {
@@ -331,37 +338,65 @@ class Handler {
             }
 
             if(key > firstq){
-                median_max_heap.insertNode(key);
+                firstq_max_heap.insertNode(key);
             } else if (key == firstq){
-                if(median_min_heap.N() < median_max_heap.N()){
-                    median_min_heap.insertNode(key);
+                if(3 * firstq_min_heap.N() < firstq_max_heap.N()){
+                    firstq_min_heap.insertNode(key);
                 } else {
-                    median_max_heap.insertNode(key);
+                    firstq_max_heap.insertNode(key);
                 }
             } else {
-                median_min_heap.insertNode(key);
+                firstq_min_heap.insertNode(key);
             }
-            // check size and set median accordingly
-            if (median_min_heap.N() > median_max_heap.N() + 1){
-                float root = median_min_heap.deleteRoot();
-                median_max_heap.insertNode(root);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
-            } else if (median_max_heap.N() > median_min_heap.N() + 1){
-                float root = median_max_heap.deleteRoot();
-                median_min_heap.insertNode(root);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
-            } else if (median_min_heap.N() == median_max_heap.N()) {
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / 2;
-            } else if (median_min_heap.N() == (median_max_heap.N() + 1)){
-                median = median_min_heap.arr[0];
+            // check size and set firstq accordingly
+            if (3 * firstq_min_heap.N() > firstq_max_heap.N() + 1){
+                double root = firstq_min_heap.deleteRoot();
+                firstq_max_heap.insertNode(root);
+                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
+            } else if (firstq_max_heap.N() > 3 * firstq_min_heap.N() + 1){
+                double root = firstq_max_heap.deleteRoot();
+                firstq_min_heap.insertNode(root);
+                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
+            } else if (3 * firstq_min_heap.N() == firstq_max_heap.N()) {
+                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
+            } else if (3 * firstq_min_heap.N() == (firstq_max_heap.N() + 1)){
+                firstq = firstq_min_heap.arr[0];
             } else {
-                median = median_max_heap.arr[0];
+                firstq = firstq_max_heap.arr[0];
+            }
+
+            if(key > thirdq){
+                thirdq_max_heap.insertNode(key);
+            } else if (key == thirdq){
+                if(thirdq_min_heap.N() < 3 * thirdq_max_heap.N()){
+                    thirdq_min_heap.insertNode(key);
+                } else {
+                    thirdq_max_heap.insertNode(key);
+                }
+            } else {
+                thirdq_min_heap.insertNode(key);
+            }
+            // check size and set thirdq accordingly
+            if (thirdq_min_heap.N() > 3 * thirdq_max_heap.N() + 1){
+                double root = thirdq_min_heap.deleteRoot();
+                thirdq_max_heap.insertNode(root);
+                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
+            } else if (3 * thirdq_max_heap.N() > thirdq_min_heap.N() + 1){
+                double root = thirdq_max_heap.deleteRoot();
+                thirdq_min_heap.insertNode(root);
+                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
+            } else if (thirdq_min_heap.N() == thirdq_max_heap.N()) {
+                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
+            } else if (thirdq_min_heap.N() == (thirdq_max_heap.N() + 1)){
+                thirdq = thirdq_min_heap.arr[0];
+            } else {
+                thirdq = thirdq_max_heap.arr[0];
             }
 
         }
 
-        vector<float> returnDataArray(){
-            vector<float> data_array;
+        vector<double> returnDataArray(){
+            vector<double> data_array;
             for (int i = 0; i < array.size(); i++){
                 if (selected_column == "gap"){
                     data_array[i] = array[i].gap;
@@ -407,9 +442,36 @@ int main(int argc, char ** argv) {
     for (int i = 0; i < line_count; i++) {
         getline(file, temp);
         if(temp == "add"){
+            i++;
             getline(file, temp);
             stringstream s(temp);
             handler.add_data(s);
+        } else if(temp == "print"){
+            cout << handler.start_date << "," << handler.stop_date << ",";
+            for(int i = 0; i < handler.features.size(); i++){
+
+                if (handler.features[i] == "mean"){
+                    cout << handler.get_mean();
+                } else if (handler.features[i] == "std"){
+                    cout << handler.get_std();
+                } else if (handler.features[i] == "min"){
+                    cout << handler.get_min();
+                } else if (handler.features[i] == "firstq"){
+                    cout << handler.get_firstq();
+                } else if (handler.features[i] == "median"){
+                    cout << handler.get_median();
+                } else if (handler.features[i] == "thirdq"){
+                    cout << handler.get_thirdq();
+                } else if (handler.features[i] == "max"){
+                    cout << handler.get_max();
+                }
+
+                if (i == handler.features.size() - 1){
+                    cout << "\n";
+                } else {
+                    cout << ",";
+                }
+            }
         }
     }
     return 0;
