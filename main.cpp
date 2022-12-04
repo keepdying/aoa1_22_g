@@ -1,11 +1,10 @@
 #include <iostream>
 #include <vector>
-#include <time.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <iomanip>
+#include <regex>
 
 using namespace std;
 
@@ -18,119 +17,203 @@ struct Household {
 };
 
 class MaxHeap {
-    public:
-        vector<double> arr;
-        // Function to insert a new node to the Heap
-        void insertNode(double Key){
-            // Increase the size of Heap by 1
-            n = n + 1;
-            // Insert the element at end of Heap
-            arr.push_back(Key);
-            // Heapify the new node following a
-            // Bottom-up approach
-            heapify(n, n - 1);
+private:
+    int n;
+
+public:
+    vector<double> arr;
+    MaxHeap() {
+        n = 0;
+    }
+
+    int N(){
+        return n;
+    }
+    // returns the index of the parent node
+    static int parent(int i) {
+        return (i - 1) / 2;
+    }
+
+    // return the index of the left child 
+    static int leftChild(int i) {
+        return 2*i + 1;
+    }
+
+    // return the index of the right child 
+    static int rightChild(int i) {
+        return 2*i + 2;
+    }
+
+    // insert the item at the appropriate position
+    void insertNode(double data) {
+
+        // first insert the time at the last position of the array 
+        // and move it up
+        arr.push_back(data);
+        n = n + 1;
+
+
+        // move up until the heap property satisfies
+        int i = n - 1;
+        while (i != 0 && arr[parent(i)] < arr[i]) {
+            swap(arr[parent(i)], arr[i]);
+            i = parent(i);
         }
-        double deleteRoot(){
-            double root = arr[0];
-            // Get the last element
-            double lastElement = arr[n - 1];
-            // Replace root with last element
-            arr[0] = lastElement;
-            // Decrease size of heap by 1
-            arr.pop_back();
-            n = n - 1;
-            // heapify the root node
-            heapify(n, 0);
-            return root;
+    }
+
+    // moves the item at position i of array a
+    // into its appropriate position
+    void heapify(int i){
+        // find left child node
+        int left = leftChild(i);
+
+        // find right child node
+        int right = rightChild(i);
+
+        // find the largest among 3 nodes
+        int largest = i;
+
+        // check if the left node is larger than the current node
+        if (left <= n && arr[left] > arr[largest]) {
+            largest = left;
         }
 
-        int N(){
-            return n;
+        // check if the right node is larger than the current node 
+        // and left node
+        if (right <= n && arr[right] > arr[largest]) {
+            largest = right;
         }
 
-    private:
-        int n = 0;
-        void heapify(int n, int i){
-            // Find parent
-            int parent = (i - 1) / 2;
-            if (arr[parent] > 0){
-                // For Max-Heap
-                // If current node is greater than its parent
-                // Swap both of them and call heapify again
-                // for the parent
-                if (arr[i] > arr[parent]) {
-                    swap(arr[i], arr[parent]);
-                    // Recursively heapify the parent node
-                    heapify(n, parent);
-                }
-            }
-        }   
+        // swap the largest node with the current node 
+        // and repeat this process until the current node is larger than 
+        // the right and the left node
+        if (largest != i) {
+            swap(arr[i],arr[largest]);
+            heapify(largest);
+        }
+    }
+
+    // deletes the max item and return
+    double deleteRoot() {
+        double root = arr[0];
+        arr.pop_back();
+        // replace the first item with the last item
+        arr[0] = arr[n - 1];
+        n = n - 1;
+
+        // maintain the heap property by heapifying the 
+        // first item
+        heapify(0);
+        return root;
+    }
 };
 
 class MinHeap {
-    public:
-        vector<double> arr;
-        // Function to insert a new node to the Heap
-        void insertNode(double Key){
-            // Increase the size of Heap by 1
-            n = n + 1;
-            // Insert the element at end of Heap
-            arr.push_back(Key);
-            // Heapify the new node following a
-            // Bottom-up approach
-            heapify(n, n - 1);
+private:
+    int n;
+
+public:
+    vector<double> arr;
+    MinHeap() {
+        n = 0;
+    }
+
+    int N(){
+        return n;
+    }
+    // returns the index of the parent node
+    static int parent(int i) {
+        return (i - 1) / 2;
+    }
+
+    // return the index of the left child 
+    static int leftChild(int i) {
+        return 2*i + 1;
+    }
+
+    // return the index of the right child 
+    static int rightChild(int i) {
+        return 2*i + 2;
+    }
+
+    // insert the item at the appropriate position
+    void insertNode(double data) {
+
+        // first insert the time at the last position of the array 
+        // and move it up
+        arr.push_back(data);
+        n = n + 1;
+
+
+        // move up until the heap property satisfies
+        int i = n - 1;
+        while (i != 0 && arr[parent(i)] > arr[i]) {
+            swap(arr[parent(i)], arr[i]);
+            i = parent(i);
         }
-        double deleteRoot()
-        {
-            double root = arr[0];
-            // Get the last element
-            double lastElement = arr[n - 1];
-            // Replace root with last element
-            arr[0] = lastElement;
-            // Decrease size of heap by 1
-            arr.pop_back();
-            n = n - 1;
-            // heapify the root node
-            heapify(n, 0);
-            return root;
+    }
+
+    // moves the item at position i of array a
+    // into its appropriate position
+    void heapify(int i){
+        // find left child node
+        int left = leftChild(i);
+
+        // find right child node
+        int right = rightChild(i);
+
+        // find the largest among 3 nodes
+        int smallest = i;
+
+        // check if the left node is larger than the current node
+        if (left <= n && arr[left] < arr[smallest]) {
+            smallest = left;
         }
 
-        int N(){
-            return n;
+        // check if the right node is larger than the current node 
+        // and left node
+        if (right <= n && arr[right] < arr[smallest]) {
+            smallest = right;
         }
-    private:
-        int n = 0;
-        void heapify(int n, int i){
-            // Find parent
-            int parent = (i - 1) / 2;
-            if (arr[parent] > 0){
-                // For Max-Heap
-                // If current node is greater than its parent
-                // Swap both of them and call heapify again
-                // for the parent
-                if (arr[i] < arr[parent]) {
-                    swap(arr[i], arr[parent]);
-                    // Recursively heapify the parent node
-                    heapify(n, parent);
-                }
-            }
-        }   
+
+        // swap the largest node with the current node 
+        // and repeat this process until the current node is larger than 
+        // the right and the left node
+        if (smallest != i) {
+            swap(arr[i],arr[smallest]);
+            heapify(smallest);
+        }
+    }
+
+    // deletes the max item and return
+    double deleteRoot() {
+        double root = arr[0];
+        arr.pop_back();
+        // replace the first item with the last item
+        arr[0] = arr[n - 1];
+        n = n - 1;
+
+        // maintain the heap property by heapifying the 
+        // first item
+        heapify(0);
+        return root;
+    }
 };
 
-class Handler {
+class Handler { // here is our main handler class
 	public:
         string selected_column;
 		vector<string> features;
         string start_date;
         string stop_date;
         
-        void add_data(stringstream &s){
+        void add_data(stringstream &s){ // add the data and compute istatistics while streaming
             Household data;
             string buffer;
             string datebuff;
             string timebuff;
 
-            getline(s, datebuff, ',');
+            getline(s, datebuff, ','); // ahhhh...
             getline(s, timebuff, ',');
             string fulldate = datebuff + "," + timebuff;
 
@@ -141,66 +224,110 @@ class Handler {
 
             getline(s, buffer, ',');
             data.gap = stod(buffer);
-
+            // parse selected column and compute mean min max on the fly.
             if (selected_column == "gap"){
-                summ+= data.gap;
+                double welford_X = data.gap;
+                double oldM = welford_M;
+
+                mean = (data.gap / double(array.size() + 1)) + (mean * (double(array.size()) / double(array.size() + 1)));
+                summ_s1 += data.gap;
+                summ_s2 += data.gap * data.gap;
+
                 if (data.gap < minn){
                     minn = data.gap;
                 }
                 if (data.gap > maxx){
                     maxx = data.gap;
+                } // compute firstq, median, and thirdq
+                
+                if (firstq_enable){
+                    processFirstqHeaps(data.gap);
                 }
-                processHeaps(data.gap);
+                if (median_enable){
+                    processMedianHeaps(data.gap);
+                }
+                if (thirdq_enable){
+                    processThirdqHeaps(data.gap);
+                }
             }
 
             getline(s, buffer, ',');
             data.grp = stod(buffer);
 
             if (selected_column == "grp"){
-                summ+= data.grp;
+                mean = (data.grp / double(array.size() + 1)) + (mean * (double(array.size()) / double(array.size() + 1)));
+                summ_s1 += data.grp;
+                summ_s2 += data.grp * data.grp;
                 if (data.grp < minn){
                     minn = data.grp;
                 }
                 if (data.grp > maxx){
                     maxx = data.grp;
+                } // compute firstq, median, and thirdq
+                if (firstq_enable){
+                    processFirstqHeaps(data.grp);
                 }
-                processHeaps(data.grp);
+                if (median_enable){
+                    processMedianHeaps(data.grp);
+                }
+                if (thirdq_enable){
+                    processThirdqHeaps(data.grp);
+                }
             }
 
             getline(s, buffer, ',');
             data.v = stod(buffer);
 
             if (selected_column == "v"){
-                summ+= data.v;
+                mean = (data.v / double(array.size() + 1)) + (mean * (double(array.size()) / double(array.size() + 1)));
+                summ_s1 += data.v;
+                summ_s2 += data.v * data.v;
+
                 if (data.v < minn){
                     minn = data.v;
                 }
                 if (data.v > maxx){
                     maxx = data.v;
+                } // compute firstq, median, and thirdq
+                if (firstq_enable){
+                    processFirstqHeaps(data.v);
                 }
-                processHeaps(data.v);
+                if (median_enable){
+                    processMedianHeaps(data.v);
+                }
+
+                if (thirdq_enable){
+                    processThirdqHeaps(data.v);
+                }
             }
 
             getline(s, buffer);
             data.gi = stod(buffer);
 
             if (selected_column == "gi"){
-                summ+= data.gi;
+                mean = (data.gi / double(array.size() + 1)) + (mean * (double(array.size()) / double(array.size() + 1)));
+                summ_s1 += data.gi;
+                summ_s2 += data.gi * data.gi;
+
                 if (data.gi < minn){
                     minn = data.gi;
                 }
                 if (data.gi > maxx){
                     maxx = data.gi;
                 }
-                processHeaps(data.gi);
+                if (firstq_enable){
+                    processFirstqHeaps(data.gi);
+                }
+                if (median_enable){
+                    processMedianHeaps(data.gi);
+                }
+
+                if (thirdq_enable){
+                    processThirdqHeaps(data.gi);
+                }
             }
 
-            array.push_back(data);
-
-            mean = summ / array.size();
-
-
-
+            array.push_back(data); // ofc keep track of data because i have 16gig ram xD.
         }
 
         double get_firstq(){
@@ -227,175 +354,153 @@ class Handler {
             return minn;
         }
 
-        double get_sum(){
-            return summ;
-        }
-
         double get_std(){
+            // stay safe folks!
             double std;
             double sum;
             for (int i = 0; i < array.size(); i++){
                 if (selected_column == "gap"){
-                    sum += (array[i].gap - mean) * (array[i].gap - mean);
+                    sum += ((array[i].gap - mean) * (array[i].gap - mean));
 
                 }
                 if (selected_column == "grp"){
-                    sum += (array[i].grp - mean) * (array[i].grp - mean) ;
+                    sum += ((array[i].grp - mean) * (array[i].grp - mean));
                 }
                 if (selected_column == "v"){
-                    sum += (array[i].v - mean) * (array[i].v - mean);
+                    sum += ((array[i].v - mean) * (array[i].v - mean));
                 }
                 if (selected_column == "gi"){
-                    sum += (array[i].gi - mean) * (array[i].gi - mean);
+                    sum += ((array[i].gi - mean) * (array[i].gi - mean));
                 }
             }
-            sum = sum / double(array.size());
+            if (array.size() < 2){
+                return 0;
+            }
+            sum = sum / double(array.size() - 1);
             std = sqrt(sum);
             return std;
         }
 
+        double get_running_std(){
+            // its not numerically stable but does the job ? (hope so xD)
+            double s0 = array.size();
+            return sqrt((summ_s2 * s0 - summ_s1 * summ_s1) / (s0 * (s0 - 1)) - 1);
+        }
+
+        void enable_firstq(){
+            firstq_enable = true;
+        }
+
+        void enable_median(){
+            median_enable = true;
+        }
+        
+        void enable_thirdq(){
+            thirdq_enable = true;
+        }
 
     private:
         vector<Household> array;
 
-        MinHeap firstq_min_heap;
-        MaxHeap firstq_max_heap;
+        MinHeap firstq_right_heap;
+        MaxHeap firstq_left_heap;
+        bool firstq_enable = false;
 
-        MinHeap median_min_heap;
-        MaxHeap median_max_heap;
+        MinHeap median_right_heap;
+        MaxHeap median_left_heap;
+        bool median_enable = false;
         
-        MinHeap thirdq_min_heap;
-        MaxHeap thirdq_max_heap;
+        MinHeap thirdq_right_heap;
+        MaxHeap thirdq_left_heap;
+        bool thirdq_enable = false;
 
         double firstq;
         double median;
         double thirdq;
 
         double minn = INT64_MAX;
-        double maxx;
+        double summ_s1 = 0;
+        double summ_s2 = 0;
+        double maxx = 0;
         double mean = 0;
-        double summ = 0;
 
-        void processHeaps(double &key){
-            if (median_min_heap.N() == 0){
+        double welford_M = 0;
+        double welford_S = 0;
 
-                firstq_min_heap.insertNode(key);
-                firstq = key;
-
-                median_min_heap.insertNode(key);
-                median = key;
-
-                thirdq_min_heap.insertNode(key);
-                thirdq = key;
-                return;
-
-            } else if (median_min_heap.N() == 1 and median_max_heap.N() == 0){
-
-                firstq_max_heap.insertNode(key);
-                median_max_heap.insertNode(key);
-                thirdq_max_heap.insertNode(key);
-
-                if(median_min_heap.arr[0] > median_max_heap.arr[0]){
-                    swap(firstq_min_heap.arr[0], firstq_max_heap.arr[0]);
-                    swap(median_min_heap.arr[0], median_max_heap.arr[0]);
-                    swap(thirdq_min_heap.arr[0], thirdq_max_heap.arr[0]);
-                }
-
-                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
-                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
-                return;
-            }
-
-            // process median
-
-            if(key > median){
-                median_max_heap.insertNode(key);
-            } else if (key == median){
-                if(median_min_heap.N() < median_max_heap.N()){
-                    median_min_heap.insertNode(key);
-                } else {
-                    median_max_heap.insertNode(key);
-                }
-            } else {
-                median_min_heap.insertNode(key);
-            }
-            // check size and set median accordingly
-            if (median_min_heap.N() > median_max_heap.N() + 1){
-                double root = median_min_heap.deleteRoot();
-                median_max_heap.insertNode(root);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
-            } else if (median_max_heap.N() > median_min_heap.N() + 1){
-                double root = median_max_heap.deleteRoot();
-                median_min_heap.insertNode(root);
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
-            } else if (median_min_heap.N() == median_max_heap.N()) {
-                median = (median_min_heap.arr[0] + median_max_heap.arr[0]) / double(2);
-            } else if (median_min_heap.N() == (median_max_heap.N() + 1)){
-                median = median_min_heap.arr[0];
-            } else {
-                median = median_max_heap.arr[0];
-            }
-
-            if(key > firstq){
-                firstq_max_heap.insertNode(key);
-            } else if (key == firstq){
-                if(3 * firstq_min_heap.N() < firstq_max_heap.N()){
-                    firstq_min_heap.insertNode(key);
-                } else {
-                    firstq_max_heap.insertNode(key);
-                }
-            } else {
-                firstq_min_heap.insertNode(key);
-            }
-            // check size and set firstq accordingly
-            if (3 * firstq_min_heap.N() > firstq_max_heap.N() + 1){
-                double root = firstq_min_heap.deleteRoot();
-                firstq_max_heap.insertNode(root);
-                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
-            } else if (firstq_max_heap.N() > 3 * firstq_min_heap.N() + 1){
-                double root = firstq_max_heap.deleteRoot();
-                firstq_min_heap.insertNode(root);
-                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
-            } else if (3 * firstq_min_heap.N() == firstq_max_heap.N()) {
-                firstq = (firstq_min_heap.arr[0] + firstq_max_heap.arr[0]) / double(2);
-            } else if (3 * firstq_min_heap.N() == (firstq_max_heap.N() + 1)){
-                firstq = firstq_min_heap.arr[0];
-            } else {
-                firstq = firstq_max_heap.arr[0];
-            }
-
-            if(key > thirdq){
-                thirdq_max_heap.insertNode(key);
-            } else if (key == thirdq){
-                if(thirdq_min_heap.N() < 3 * thirdq_max_heap.N()){
-                    thirdq_min_heap.insertNode(key);
-                } else {
-                    thirdq_max_heap.insertNode(key);
-                }
-            } else {
-                thirdq_min_heap.insertNode(key);
-            }
-            // check size and set thirdq accordingly
-            if (thirdq_min_heap.N() > 3 * thirdq_max_heap.N() + 1){
-                double root = thirdq_min_heap.deleteRoot();
-                thirdq_max_heap.insertNode(root);
-                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
-            } else if (3 * thirdq_max_heap.N() > thirdq_min_heap.N() + 1){
-                double root = thirdq_max_heap.deleteRoot();
-                thirdq_min_heap.insertNode(root);
-                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
-            } else if (thirdq_min_heap.N() == thirdq_max_heap.N()) {
-                thirdq = (thirdq_min_heap.arr[0] + thirdq_max_heap.arr[0]) / double(2);
-            } else if (thirdq_min_heap.N() == (thirdq_max_heap.N() + 1)){
-                thirdq = thirdq_min_heap.arr[0];
-            } else {
-                thirdq = thirdq_max_heap.arr[0];
-            }
-
+        double rheap_pct(MaxHeap &lhap, MinHeap &rhap){
+            return double(lhap.N()) / (lhap.N() + rhap.N() - 1);
+        }
+        double lheap_pct(MaxHeap &lhap, MinHeap &rhap){
+            return double(lhap.N() - 1) / (lhap.N() + rhap.N() - 1);
         }
 
-        vector<double> returnDataArray(){
+        double firstq_lheap_coefff(MaxHeap &lhap, MinHeap &rhap, double quant){
+            double r_pct = rheap_pct(lhap, rhap);
+            double l_pct = lheap_pct(lhap, rhap);
+            return (quant - l_pct) / (r_pct - l_pct);
+        }
+
+        double firstq_rheap_coefff(MaxHeap &lhap, MinHeap &rhap, double quant){
+            double r_pct = rheap_pct(lhap, rhap);
+            double l_pct = lheap_pct(lhap, rhap);
+            return (r_pct - quant) / (r_pct - l_pct);
+        }
+
+        void processFirstqHeaps(double &key){
+            // push to left heap
+            firstq_left_heap.insertNode(key);
+            // delete root and push to right heap
+            firstq_right_heap.insertNode(firstq_left_heap.deleteRoot());
+            // check if our firstq heaps balanced 1k | 3k
+            while (3 * firstq_left_heap.N() < 1 * firstq_right_heap.N()){
+                firstq_left_heap.insertNode(firstq_right_heap.deleteRoot());
+            }
+            // calculate percentiles of each heap and coeff
+            double firstq_lheap_pct = lheap_pct(firstq_left_heap, firstq_right_heap);
+            double firstq_rheap_pct = rheap_pct(firstq_left_heap, firstq_right_heap);
+            double firstq_lheap_coeff = firstq_lheap_coefff(firstq_left_heap, firstq_right_heap, 0.25);
+            double firstq_rheap_coeff = firstq_rheap_coefff(firstq_left_heap, firstq_right_heap, 0.25);
+            firstq = firstq_left_heap.arr[0] * (1 - firstq_lheap_coeff) + firstq_right_heap.arr[0] * (1 - firstq_rheap_coeff);
+        }
+
+        void processMedianHeaps(double &key){
+            // push to left heap 
+            median_left_heap.insertNode(key);
+
+            // delete root and push to right heap
+            median_right_heap.insertNode(median_left_heap.deleteRoot());
+
+            while (median_left_heap.N() < median_right_heap.N()){
+                median_left_heap.insertNode(median_right_heap.deleteRoot());
+            }
+            // then calculate mean
+            if ((median_left_heap.N() + median_right_heap.N()) % 2 == 1){
+                median = median_left_heap.arr[0];
+            } else {
+                median = median_left_heap.arr[0] * 0.5 + median_right_heap.arr[0] * 0.5;
+            }
+        }
+
+        void processThirdqHeaps(double &key){
+            // like firstq heap but inversed
+            // push to right heap 
+            thirdq_right_heap.insertNode(key); 
+            // delete root and push to left heap
+            thirdq_left_heap.insertNode(thirdq_right_heap.deleteRoot());
+            // check if our thirdq heaps balanced 3k | 1k
+            while (3 * thirdq_right_heap.N() < 1 * thirdq_left_heap.N()){
+                thirdq_right_heap.insertNode(thirdq_left_heap.deleteRoot());
+            }
+            // calculate percentiles of each heap and coeff
+            double thirdq_lheap_pct = lheap_pct(thirdq_left_heap, thirdq_right_heap);
+            double thirdq_rheap_pct = rheap_pct(thirdq_left_heap, thirdq_right_heap);
+            double thirdq_lheap_coeff = firstq_lheap_coefff(thirdq_left_heap, thirdq_right_heap, 0.75);
+            double thirdq_rheap_coeff = firstq_rheap_coefff(thirdq_left_heap, thirdq_right_heap, 0.75); 
+            // its show time...
+            thirdq = thirdq_left_heap.arr[0] * (1 - thirdq_lheap_coeff) + thirdq_right_heap.arr[0] * (1 - thirdq_rheap_coeff);
+        }
+
+        vector<double> returnDataArray(){ // i thought i would use it xD
             vector<double> data_array;
             for (int i = 0; i < array.size(); i++){
                 if (selected_column == "gap"){
@@ -416,63 +521,77 @@ class Handler {
 };
 
 int main(int argc, char ** argv) {
-    // string filename = argv[1];
-	string filename = "input1.txt";
+    string filename = argv[1];
+	// string filename = "./inputs/input_std_10.txt";
+    string outname = regex_replace(filename, std::regex("input"), "output");
+    ofstream ofile;
+    ofile.open(outname, ios::trunc); // open a filestream given argv input_*.txt -> output_*.txt
+
     string temp;
     int feature_count;
     int line_count;
     fstream file;
-    Handler handler;
+    Handler handler; // create our handler class object;
 
     file.open(filename, ios::in);
-    getline(file, temp);
-    feature_count = stoi(temp);
+    getline(file, temp); // some getline bs... 
+    feature_count = stoi(temp); // read how many features to keep
     for (int i = 0; i < feature_count; i++) {
         getline(file, temp);
+        if (temp == "firstq"){
+            handler.enable_firstq();
+        } else if (temp == "median"){
+            handler.enable_median();
+        } else if (temp == "thirdq"){
+            handler.enable_thirdq();
+        }
+
         handler.features.push_back(temp);
     }
-
     getline(file, temp);
+    getline(file, temp); // more getline bs.
     stringstream s(temp);
     getline(s, temp, ',');
-    line_count = stoi(temp);
+    line_count = stoi(temp); // get line count 
     getline(s, temp);
-    handler.selected_column = temp;
+    handler.selected_column = temp; // get selected column
 
-    for (int i = 0; i < line_count; i++) {
+    for (int i = 0; i < line_count; i++) { // lets begin
         getline(file, temp);
-        if(temp == "add"){
-            i++;
+        if(temp == "add"){ // if its add
+            i++; // we gon use getline so increment iterator.
             getline(file, temp);
             stringstream s(temp);
-            handler.add_data(s);
-        } else if(temp == "print"){
-            cout << handler.start_date << "," << handler.stop_date << ",";
+            handler.add_data(s); // append data to our data_array
+        } else if(temp == "print"){ // if its print then pass it to ofstream
+            ofile << handler.start_date << "," << handler.stop_date << ",";
             for(int i = 0; i < handler.features.size(); i++){
 
-                if (handler.features[i] == "mean"){
-                    cout << handler.get_mean();
+                if (handler.features[i] == "mean"){ // pretty self-explanatory tbh.
+                    ofile << handler.get_mean();
                 } else if (handler.features[i] == "std"){
-                    cout << handler.get_std();
+                    ofile << handler.get_std();
                 } else if (handler.features[i] == "min"){
-                    cout << handler.get_min();
+                    ofile << handler.get_min();
                 } else if (handler.features[i] == "firstq"){
-                    cout << handler.get_firstq();
+                    ofile << handler.get_firstq();
                 } else if (handler.features[i] == "median"){
-                    cout << handler.get_median();
+                    ofile << handler.get_median();
                 } else if (handler.features[i] == "thirdq"){
-                    cout << handler.get_thirdq();
+                    ofile << handler.get_thirdq();
                 } else if (handler.features[i] == "max"){
-                    cout << handler.get_max();
+                    ofile << handler.get_max();
                 }
 
                 if (i == handler.features.size() - 1){
-                    cout << "\n";
+                    ofile << "\n";
                 } else {
-                    cout << ",";
+                    ofile << ",";
                 }
             }
         }
     }
-    return 0;
+    ofile.close(); // dont leave open pointer behind.
+    file.close();
+    return 0; // goodbye!
 }

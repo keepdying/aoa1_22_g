@@ -3,6 +3,8 @@
         "*.tcc": "cpp",
         "list": "cpp",
         "iostream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "iosfwd": "cpp",
+        "fstream": "cpp"
     }
 }
